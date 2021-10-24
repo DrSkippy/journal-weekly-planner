@@ -30,10 +30,10 @@ if "__main__" == __name__:
     doc = w.plan_paper()
     print(columns(doc))
 
-    print()
-    doc1 = w.plan_paper_week_days()
-    print(columns(doc1, 1))
+    with open("./plan.html", "w") as output_file:
+        doc1 = w.plan_paper_week_days()
+        output_file.write(columns(doc1, 1))
 
-    print()
-    doc2 = w.plan_nozbe()
-    print(columns(doc2, 1))
+    with open("./plan.nozbe", "w") as output_file:
+        doc2 = w.plan_nozbe()
+        output_file.write(columns(doc2, 1))
