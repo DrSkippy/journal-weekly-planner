@@ -32,6 +32,7 @@ class Activities:
 
 class Week:
     UNITS_HOUR = "hour"
+    UNITS_COUNT = "count"
 
     ACTIVITY_NAME = 0
     ACTIVITY_TIME = 2
@@ -55,6 +56,20 @@ class Week:
     }
     activity_list = set()
 
+    def hours_format_units(self, x, unit):
+        fmt = "{:4} {:3}"
+        if unit == self.UNITS_HOUR:
+            if x < 2:
+                val, ustring =  int(x * 60), "min"
+            else:
+                val, ustring = round(x, 1), "hrs"
+        elif unit == self.UNITS_COUNT:
+            val, ustring =  int(x), "cnt"
+        else:
+            # display provided... must be 3 char
+            val, ustring = int(x), unit[:3]
+        return fmt.format(val, ustring)
+
     def add_activity(self, activity, days):
         self.activity_list.add(activity[0])
         if len(days) > 0 and days[0] == "a":
@@ -62,11 +77,13 @@ class Week:
             days = list(self.days_of_week.keys())
         n = len(days)
         for d in days:
-            if activity[3] == self.UNITS_HOUR:
+            if activity[self.ACTIVITY_UNITS] == self.UNITS_HOUR:
+                # hours split over days
                 self.days[d].append((activity[self.ACTIVITY_NAME],
                                      round(float(activity[self.ACTIVITY_TIME]) / n, 2),
                                      activity[self.ACTIVITY_UNITS]))
             else:
+                # counts are each session
                 self.days[d].append((activity[self.ACTIVITY_NAME],
                                      round(float(activity[self.ACTIVITY_TIME]), 2),
                                      activity[self.ACTIVITY_UNITS]))
@@ -77,14 +94,8 @@ class Week:
             res.append(self.days_of_week[d])
             res.append("<hr>")
             for x in self.days[d]:
-                if x[self.DAYS_UNITS] == self.UNITS_HOUR:
-                    res.append("{:13} ({:4d} min): __________".format(x[self.DAYS_ACTIVITY],
-                                                                      int(x[self.DAYS_DAILY_TIME] * 60)))
-                else:  # count
-                    res.append(
-                        "{:13} ({:4d} {}): __________".format(x[self.DAYS_ACTIVITY],
-                                                              int(x[self.DAYS_DAILY_TIME]),
-                                                              x[self.DAYS_UNITS]))
+                value_display_str = self.hours_format_units(x[self.DAYS_DAILY_TIME], x[self.DAYS_UNITS])
+                res.append("{:13} ({}): __________".format(x[self.DAYS_ACTIVITY], value_display_str))
             res.append("<hr>")
         return res
 
@@ -99,28 +110,38 @@ class Week:
             for d in self.days:
                 for x in self.days[d]:
                     if x[self.DAYS_ACTIVITY] == activity:
-                        if x[self.DAYS_UNITS] == self.UNITS_HOUR:
-                            row.append("{:4d} min: ______ ".format(int(x[self.DAYS_DAILY_TIME] * 60)))
-                        else:  # count
-                            row.append("{:4d} {}: ______ ".format(int(x[self.DAYS_DAILY_TIME]),
-                                                                  x[self.DAYS_UNITS]))
+                        value_display_str = self.hours_format_units(x[self.DAYS_DAILY_TIME], x[self.DAYS_UNITS])
+                        row.append("{}: _______".format(value_display_str))
                         break
                 else:
                     row.append(" " * 17)
+            res.append(fmt.format(" "*13, *[" "*16 for i in range(7)]))
             res.append("|".join(row))
         res.append("<hr>")
         res.append("</pre>\n")
         return res
 
+    def sunday_start(self):
+        today = datetime.date.today()
+        sunday = today + datetime.timedelta((6 - today.weekday()) % 7)
+        print("Running tasks for week plan on {}, generating Nozbe tasks starting {}".format(today, sunday))
+        dated_dow = {}
+        for i,k in enumerate(self.days_of_week.keys()):
+            _date = sunday + datetime.timedelta(i)
+            dated_dow[k] = _date.strftime("%B %-d")
+        return dated_dow
+
     def plan_nozbe(self):
+        dow_dict = self.sunday_start()
         res = []
         for d in self.days:
             for x in self.days[d]:
+                value_display_str = self.hours_format_units(x[self.DAYS_DAILY_TIME], x[self.DAYS_UNITS])
                 res.append(
-                    ". {} for {} {} #{} #{}".format(x[self.DAYS_ACTIVITY],
-                                                    x[self.DAYS_DAILY_TIME],
-                                                    x[self.DAYS_UNITS],
-                                                    self.days_of_week[d],
+                    ". {} for {} #{} #{}".format(x[self.DAYS_ACTIVITY],
+                                                    value_display_str,
+                                                    #self.days_of_week[d],
+                                                    dow_dict[d],
                                                     "Yearly Goals"))
                 res.append("{} {}".format("Generated by planning script",
                                           datetime.datetime.now().strftime("%Y-%m-%d %H:%M")))
