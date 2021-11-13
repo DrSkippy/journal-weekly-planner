@@ -100,9 +100,10 @@ class Week:
         return res
 
     def plan_paper_week_days(self):
-        res = ["<pre>\n"]
+        res = ["<pre>"]
         res.append("<hr>")
         fmt = "{:13}" + "| {:16}" * 7
+        res.append(fmt.format(*tuple([" "] + list(self.sunday_start().values()))))
         res.append(fmt.format(*tuple(["Activity"] + [self.days_of_week[i] for i in self.days_of_week])))
         res.append("<hr>")
         for activity in self.activity_list:
@@ -121,8 +122,12 @@ class Week:
         res.append("</pre>\n")
         return res
 
-    def sunday_start(self):
-        today = datetime.date.today()
+    def sunday_start(self, date_obj=None):
+        if date_obj is not None:
+            today = date_obj
+        else:
+            today = datetime.date.today()
+        # sunday = 6
         sunday = today + datetime.timedelta((6 - today.weekday()) % 7)
         print("Running tasks for week plan on {}, generating Nozbe tasks starting {}".format(today, sunday))
         dated_dow = {}
