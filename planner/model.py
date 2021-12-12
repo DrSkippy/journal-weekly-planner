@@ -99,11 +99,11 @@ class Week:
             res.append("<hr>")
         return res
 
-    def plan_paper_week_days(self):
+    def plan_paper_week_days(self, date_obj=None):
         res = ["<pre>"]
         res.append("<hr>")
         fmt = "{:13}" + "| {:16}" * 7
-        res.append(fmt.format(*tuple([" "] + list(self.sunday_start().values()))))
+        res.append(fmt.format(*tuple([" "] + list(self.sunday_start(date_obj).values()))))
         res.append(fmt.format(*tuple(["Activity"] + [self.days_of_week[i] for i in self.days_of_week])))
         res.append("<hr>")
         for activity in self.activity_list:
@@ -136,8 +136,8 @@ class Week:
             dated_dow[k] = _date.strftime("%B %-d")
         return dated_dow
 
-    def plan_nozbe(self):
-        dow_dict = self.sunday_start()
+    def plan_nozbe(self, date_obj=None):
+        dow_dict = self.sunday_start(date_obj)
         res = []
         for d in self.days:
             for x in self.days[d]:
