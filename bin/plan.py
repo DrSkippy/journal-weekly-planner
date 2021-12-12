@@ -3,23 +3,34 @@ import datetime
 from planner import model
 from planner.columns import columns
 
-def day_input(s,d):
-    a = input("{} ({}): ".format(s,d))
-    days = None
+
+def day_input(s):
+    a = input("{:15} ({} {}) ({}): ".format(s[0],
+                                            s[2],
+                                            s[3],
+                                            s[4].strip("[]").replace(",", " ")))
+    updated_days = None
+    update_weekly_time = s[2]
     if a == "":
-        tmp = d.strip("[]")
+        tmp = s[4].strip("[]")
         if tmp != "":
             # use the default
-            days = tmp.lower().split(",")
+            updated_days = tmp.lower().split(",")
     else:
         tmp = a.strip().lower().split(" ")
+        try:
+            update_weekly_time = str(float(tmp[-1]))
+            tmp = tmp[:-1]
+        except ValueError:
+            update_weekly_time = s[2]
         if len(tmp) > 0 and not tmp[0].startswith("x"):
-            days = tmp
-    return days
+            updated_days = tmp
+    return updated_days, update_weekly_time
 
 
 if "__main__" == __name__:
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--sunday-start-date', dest='start_date', type=str,
                         default=None, help='sunday Start date')
@@ -34,12 +45,11 @@ if "__main__" == __name__:
     print(m)
     w = model.Week()
 
+    print("x - no days; enter number at the end to update time")
     for activity in m.data:
-        activity_name = activity[0]
-        default_days = activity[4]
-        days = day_input(activity_name, default_days)
+        days, weekly_time = day_input(activity)
         if days is not None:
-            w.add_activity(activity, days)
+            w.add_activity(activity, days, weekly_time)
 
     print()
     doc = w.plan_paper()

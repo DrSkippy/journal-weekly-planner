@@ -70,7 +70,7 @@ class Week:
             val, ustring = int(x), unit[:3]
         return fmt.format(val, ustring)
 
-    def add_activity(self, activity, days):
+    def add_activity(self, activity, days, weekly_time):
         self.activity_list.add(activity[0])
         if len(days) > 0 and days[0] == "a":
             # all days of week
@@ -79,14 +79,14 @@ class Week:
         for d in days:
             if activity[self.ACTIVITY_UNITS] == self.UNITS_HOUR:
                 # hours split over days
-                self.days[d].append((activity[self.ACTIVITY_NAME],
-                                     round(float(activity[self.ACTIVITY_TIME]) / n, 2),
-                                     activity[self.ACTIVITY_UNITS]))
+                daily_time = float(weekly_time) / n
             else:
-                # counts are each session
-                self.days[d].append((activity[self.ACTIVITY_NAME],
-                                     round(float(activity[self.ACTIVITY_TIME]), 2),
-                                     activity[self.ACTIVITY_UNITS]))
+                # count per session
+                daily_time = float(weekly_time)
+            daily_time = round(daily_time, 2)
+            self.days[d].append((activity[self.ACTIVITY_NAME],
+                                 daily_time,
+                                 activity[self.ACTIVITY_UNITS]))
 
     def plan_paper(self):
         res = ["<hr>"]
@@ -100,8 +100,7 @@ class Week:
         return res
 
     def plan_paper_week_days(self, date_obj=None):
-        res = ["<pre>"]
-        res.append("<hr>")
+        res = ["<pre>", "<hr>"]
         fmt = "{:13}" + "| {:16}" * 7
         res.append(fmt.format(*tuple([" "] + list(self.sunday_start(date_obj).values()))))
         res.append(fmt.format(*tuple(["Activity"] + [self.days_of_week[i] for i in self.days_of_week])))
