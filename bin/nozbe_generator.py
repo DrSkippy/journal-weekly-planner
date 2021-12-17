@@ -5,27 +5,21 @@ import datetime
 import sys
 
 example = """
-Do this, 2021-12-16, [task comment: mom says you should do this]
-Do that, 2021-12-18, Every Week
-I'm mister Burns, 2022-02-01, Every Weekday, Inbox
-"Blah, blah, blah", 2022-03-01, Every Week, Aspen Mesh, 6 h 
 # a comment line
+(Alembic) test old file on old hologram apparatus, 2021-12-01, Projects
+"(Alembic) bonus, sound track for pendulums?", 2021-12-01, Projects
+(Alembic) packing list/BOM for alembic, 2021-12-01, Projects
+(Alembic) communicate with kevin re progress and ideas, 2021-12-01, Projects
+(Alembic) sketch notes of the arch of holographic universe discussion, 2021-12-01, Projects
+(Alembic) reread and update notes, 2021-12-01, Projects
+(Alembic) check batteries for lasers, 2021-12-01, Projects
+(Alembic) check batteries for lights (even as backup), 2021-12-01, Projects
 """
 
 doc = """
 Make a file with tasks:
 "text", due_date, hash0, hash2, ..., [comment1], [comment2], ...
-...
-# comment line
-<eof>
-
-Example lines:
-
-{}
-
-Cut and paste lines and then update with something like this to set task parameters.
-    1,$s/$/,2022-05-01, Movies, 2 h, Home Computer
-""".format(example)
+"""
 
 FMT = "%Y-%m-%d"
 DDFMT = "%B %-d"
@@ -56,10 +50,10 @@ for raw_row in rdr:
     else:
         i += 1
 
-    row, comment = [], []
+    row, comment = [], ["Generated {}".format(datetime.datetime.today())]
     for field in raw_row:
         if field.startswith("["):
-            # this is a nozbe comment
+            # this is a Nozbe comment
             # you can have as many as you want
             comment.append(field.strip("[]"))
         else:
