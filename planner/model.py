@@ -12,6 +12,8 @@ class Activities:
             rdr = csv.reader(input_file)
             first = True
             for row in rdr:
+                if row[0].startswith("#"):
+                    continue
                 if first:
                     self.header = row
                     first = False
@@ -118,6 +120,8 @@ class Week:
             res.append(fmt.format(" " * 13, *[" " * 16 for i in range(7)]))
             res.append("|".join(row))
         res.append("<hr>")
+        for i in range(55-len(res)):
+            res.append(fmt.format(*[" "]*8))
         res.append("</pre>\n")
         return res
 
