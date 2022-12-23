@@ -61,7 +61,9 @@ class Week:
     def hours_format_units(self, x, unit):
         fmt = "{:4} {:3}"
         if unit == self.UNITS_HOUR:
-            if x < 2:
+            if x < 0.0334:
+                val, ustring = int(x*3600), "sec"
+            elif x < 2:
                 val, ustring = int(x * 60), "min"
             else:
                 val, ustring = round(x, 1), "hrs"
