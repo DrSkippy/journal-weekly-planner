@@ -55,6 +55,10 @@ if "__main__" == __name__:
     doc = w.plan_paper()
     print(columns(doc))
 
+    with open("./plan.txt", "w") as output_file:
+        output_file.write(columns(doc, 2))
+        output_file.write("\n")
+
     with open("./plan.html", "w") as output_file:
         doc1 = w.plan_paper_week_days(date_obj)
         output_file.write(columns(doc1, 1))

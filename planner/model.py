@@ -44,6 +44,8 @@ class Week:
     DAYS_DAILY_TIME = 1
     DAYS_UNITS = 2
 
+    PAGE_ROWS = 58
+
     days_of_week = {
         "su": "Sunday",
         "m": "Monday",
@@ -104,7 +106,7 @@ class Week:
         return res
 
     def plan_paper_week_days(self, date_obj=None):
-        res = ["<pre>", "<hr>"]
+        res = ["<pre>" ]
         fmt = "{:13}" + "| {:16}" * 7
         res.append(fmt.format(*tuple([" "] + list(self.sunday_start(date_obj).values()))))
         res.append(fmt.format(*tuple(["Activity"] + [self.days_of_week[i] for i in self.days_of_week])))
@@ -122,7 +124,12 @@ class Week:
             res.append(fmt.format(" " * 13, *[" " * 16 for i in range(7)]))
             res.append("|".join(row))
         res.append("<hr>")
-        for i in range(55-len(res)):
+        # score box
+        res.append(fmt.format(" " * 13, *["   |         " for i in range(7)]))
+        res.append(fmt.format(" " * 13, *["   |         " for i in range(7)]))
+        res.append(fmt.format(" " * 13, *["---           " for i in range(7)]))
+        # fill to end of page
+        for i in range(self.PAGE_ROWS-len(res) - 2):
             res.append(fmt.format(*[" "]*8))
         res.append("</pre>\n")
         return res
