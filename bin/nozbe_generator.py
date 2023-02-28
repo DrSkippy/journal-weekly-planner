@@ -3,6 +3,8 @@ import argparse
 import csv
 import datetime
 import sys
+import re
+import requests
 
 EXAMPLE_FILE = """
 # a comment line
@@ -25,6 +27,8 @@ DATE_FORMAT = "%Y-%m-%d"
 DUE_DATE_FORMAT = "%B %-d"
 TASK_OUTPUT_FORMAT = ". {}  #{}"
 
+lre = re.compile('https://substack.com/redirect/.*?[?]')
+
 
 def parse_agrs():
     parser = argparse.ArgumentParser(description=USE_DESCRIPTION)
@@ -38,7 +42,39 @@ def parse_agrs():
                         help='Common hash tag for all tasks')
     parser.add_argument('-f', '--file', action='store_true', default=False,
                         help='Generate an example file')
+    parser.add_argument('-e', '--extract-data-machina', default=None,
+                        help='Read in data machina email export file')
     return parser.parse_args()
+
+
+def fetch_links(in_file_name):
+    document_data = []
+    with open(in_file_name, "r") as infile:
+        for row in infile:
+            document_data.append(row.strip(' \n\r='))
+    document = ''.join(document_data)
+    links = set([x[:-1].replace("%", "=") for x in lre.findall(document) if len(x) < 100])
+    return links
+
+
+def parse_data_machina(in_file_name):
+    links = fetch_links(in_file_name)
+    for url in links:
+        try:
+            resp = requests.get(url)
+            try:
+                u, _ = resp.url.split("?")
+            except ValueError:
+                u = resp.url
+            if "substack" not in u:
+                fields = ["(DataMachina) Visit link", "2020-01-01", "Continuing Education"]
+                comments = [f'Generated {datetime.datetime.now().strftime("%Y-%m-%d %H:%M")}',
+                            f"Source: {in_file_name}",
+                            f"Total links this email: {len(links)}",
+                            f"Visit: {u}"]
+                yield fields, comments
+        except (requests.exceptions.ConnectionError, requests.exceptions.InvalidSchema) as e:
+            continue
 
 
 def parse_input():
@@ -82,8 +118,14 @@ if __name__ == "__main__":
         sys.exit(0)
 
     date_stride = datetime.timedelta(days=float(args.stride))
+
+    if args.extract_data_machina is None:
+        line_parser = parse_input()
+    else:
+        line_parser = parse_data_machina(args.extract_data_machina)
+
     due_date = None
-    for fields, comments in parse_input():
+    for fields, comments in line_parser:
         date_str = fields[1] if args.due_date is None else args.due_date
         due_date, due_date_str = calculate_due_date(due_date, date_str, date_stride, args.weekdays)
         if args.hash is not None:
