@@ -7,10 +7,10 @@ import json
 import datetime
 
 FMT = "%Y-%m-%d_%H:%M"
-MARKER_STR = "###NOZBE"
+MARKER_STR = "NOZBE"
 EXTRACTED_MARKER = ">>> Note updated by Nozbe Task Extractor"
 
-task_re = re.compile(f"{MARKER_STR}.*{MARKER_STR}", re.IGNORECASE | re.MULTILINE)
+task_re = re.compile(f"{MARKER_STR}.*{MARKER_STR}", re.MULTILINE)
 
 token = "7a12bb249f8374b2413fae6094401dce3347215c5e9c19391ec94121d1233dbe8d8e50468a08f96c076b12b5552071bcc60b1e123cb7440ec6162e6f63a6568e"
 token_parameter = f"token={token}"
@@ -41,10 +41,10 @@ def extend_task_and_defaults(task_dict, note_id):
     newline = f"Joplin Importer Version={__version__} at {datetime.datetime.now().strftime(FMT)}"
     newline += f"\nTasks associated with NoteID={note_id}"
     task_dict["note_id"] = note_id
-    if task_dict["notes"] is None or task_dict["notes"] == "":
-        task_dict["notes"] = newline
+    if task_dict["comments"] is None or task_dict["comments"] == "":
+        task_dict["comments"] = newline
     else:
-        task_dict["notes"] += f"\n{newline}"
+        task_dict["comments"] += f"\n{newline}"
     if task_dict["due_date"] is None or task_dict["due_date"] == "":
         task_dict["due_date"] = datetime.date.today().strftime("%Y-%m-%d")
     task_dict['hash_tags'] = [x for x in task_dict['hash_tags'] if x is not None and x != ""]

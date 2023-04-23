@@ -32,7 +32,7 @@ def parse_input(final=False):
     task_dicts = get_notes_tasks_list()
     for task in task_dicts:
         comments = [f'Generated {datetime.datetime.now().strftime("%Y-%m-%d %H:%M")}']
-        comments.append(task['notes'])
+        comments.append(task['comments'])
         fields = [task["title"], task['due_date']]
         fields.extend(task['hash_tags'])
         yield fields, comments
