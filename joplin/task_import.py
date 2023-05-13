@@ -10,7 +10,7 @@ FMT = "%Y-%m-%d_%H:%M"
 MARKER_STR = "NOZBE"
 EXTRACTED_MARKER = ">>> Note updated by Nozbe Task Extractor"
 
-task_re = re.compile(f"{MARKER_STR}.*{MARKER_STR}", re.MULTILINE)
+task_re = re.compile(f"{MARKER_STR}.*{MARKER_STR[::-1]}", re.MULTILINE)
 
 token = "7a12bb249f8374b2413fae6094401dce3347215c5e9c19391ec94121d1233dbe8d8e50468a08f96c076b12b5552071bcc60b1e123cb7440ec6162e6f63a6568e"
 token_parameter = f"token={token}"
