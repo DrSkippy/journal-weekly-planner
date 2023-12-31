@@ -66,10 +66,10 @@ def parse_data_machina(in_file_name):
                 u = resp.url
             if "substack" not in u:
                 fields = ["(DataMachina) Visit link", "2020-01-01", "Continuing Education"]
-                comments = [f'Generated {datetime.datetime.now().strftime("%Y-%m-%d %H:%M")}',
+                comments = ([f'Generated {datetime.datetime.now().strftime("%Y-%m-%d %H:%M")}',
                             f"Source: {in_file_name}",
                             f"Total links this email: {len(links)}",
-                            f"Visit: {u}"]
+                            f"Visit: {u}"])
                 yield fields, comments
         except (requests.exceptions.ConnectionError, requests.exceptions.InvalidSchema) as e:
             continue
@@ -89,6 +89,10 @@ def parse_input():
                 fields.append(field.strip())
         yield fields, comments
 
+def format_joplin_note(comments):
+    link = f"[{comments[3][15:30]}...]({comments[3][7:]})"
+    title = f"# {comments[1][15:]}\n\n\n"
+    return f"{link}\n\n", title
 
 if __name__ == "__main__":
     args = parse_agrs()
@@ -104,6 +108,7 @@ if __name__ == "__main__":
         line_parser = parse_data_machina(args.extract_data_machina)
 
     due_date = None
+    joplin_task_lines = []
     for fields, comments in line_parser:
         date_str = fields[1] if args.due_date is None else args.due_date
         due_date, due_date_str = calculate_due_date(due_date, date_str, date_stride, args.weekdays)
@@ -111,3 +116,11 @@ if __name__ == "__main__":
             fields.extend(args.hash)
         task_lines = format_output(fields, comments, due_date_str)
         print("\n".join(task_lines))
+        link, title = format_joplin_note(comments)
+        joplin_task_lines.append(link)
+
+    with open("joplin_tasks.md", "w") as outfile:
+        outfile.write(title)
+        outfile.write(f"({datetime.datetime.now()})\n\n")
+        outfile.writelines(joplin_task_lines)
+
