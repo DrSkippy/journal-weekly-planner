@@ -4,27 +4,32 @@ from planner import model
 from planner.columns import columns
 
 
-def day_input(s):
-    a = input("{:15} ({} {}) ({}): ".format(s[0],
-                                            s[2],
-                                            s[3],
-                                            s[4].strip("[]").replace(",", " ")))
-    updated_days = None
-    update_weekly_time = s[2]
-    if a == "":
-        tmp = s[4].strip("[]")
-        if tmp != "":
-            # use the default
-            updated_days = tmp.lower().split(",")
-    else:
-        tmp = a.strip().lower().split(" ")
-        try:
-            update_weekly_time = str(float(tmp[-1]))
-            tmp = tmp[:-1]
-        except ValueError:
-            update_weekly_time = s[2]
-        if len(tmp) > 0 and not tmp[0].startswith("x"):
-            updated_days = tmp
+def day_input(s, valid_days_list = ["su", "m", "t", "w", "h", "f", "sa"]):
+    valid_days = False
+    while not valid_days:
+        a = input("{:15} ({} {}) ({}): ".format(s[0], s[2], s[3], s[4].strip("[]").replace(",", " ")))
+        update_weekly_time = s[2]  # default time unless changed
+        a = a.strip()
+        if a == "":
+            updated_days = s[4].strip("[]").lower().split(",") if s[4] != "" else []
+            valid_days = True
+        else:
+            tmp_list = a.strip().lower().split(" ")
+            try:
+                # if the last token is a number, it is the weekly time
+                update_weekly_time = str(float(tmp_list[-1]))
+                tmp_list = tmp_list[:-1] # remove the last token
+            except ValueError:
+                # use the default
+                pass
+            if len(tmp_list) == 0 or tmp_list[0].startswith("x"):
+                updated_days = []
+                valid_days = True
+            elif all([x in valid_days_list for x in tmp_list]):
+                updated_days = tmp_list
+                valid_days = True
+            else:
+                print("Invalid day or days. Please re-enter...")
     return updated_days, update_weekly_time
 
 
@@ -47,7 +52,7 @@ if "__main__" == __name__:
 
     print("x - no days; enter number at the end to update time")
     for activity in m.data:
-        days, weekly_time = day_input(activity)
+        days, weekly_time = day_input(activity, valid_days_list = list(w.days_of_week.keys()))
         if days is not None:
             w.add_activity(activity, days, weekly_time)
 

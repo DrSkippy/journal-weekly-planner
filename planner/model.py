@@ -44,7 +44,7 @@ class Week:
     DAYS_DAILY_TIME = 1
     DAYS_UNITS = 2
 
-    PAGE_ROWS = 58
+    PAGE_ROWS = 56
 
     days_of_week = {
         "su": "Sunday",
